@@ -1,0 +1,38 @@
+INPUT
+1. input items into input chest
+2. turtle scans items
+3. turtle updates internal database
+4. turtle approves transfer and moves items to storage
+
+OUTPUT
+Each item must be assigned to a node, direction, and signal strength integer.
+
+A wireless rednet signal will be sent to the node containing the item with the
+direction and signal strength
+
+The node will then output an analog redstone signal for a brief moment,
+outputting the item.
+
+This means that the internal database must also contain node, direction,
+and signal strength data.
+
+CONFIGURATION
+A plaintext configuration file will contain the ID's of each computer. A 
+helper program will also exist which adds nodes and database entries with
+direction and signal strength information.
+
+HARDWARE
+Each node must be it's own computer. Nodes will be stored in an array.
+A turtle will do the scanning and network between the controller and nodes.
+The controller will be responsible for displaying tabular data and internal
+record keeping.
+
+FILES
+The controller will keep a plaintext configuration file with networking information
+The controller will keep serialized database data for read/write operations
+The controller will have a config helper program that adds records and nodes
+The controller will have a display program that displays tabular data
+The controller will keep a plaintext log file that contains input and output.
+The controller will have an interface for outputting items.
+The turtle will have a basic scan send and push program
+The nodes will have a basic listener that activates redstone signals.
