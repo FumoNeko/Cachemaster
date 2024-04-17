@@ -40,7 +40,7 @@ if senderID == controller.id then -- controller.id is nil?
         local damage = tostring(scanData.damage)
         nameScheme = scanData.name.." "..damage
     end
-    print("Choose a DISPLAY NAME for this item.")
+    print("Choose a UNIQUE DISPLAY NAME for this item.")
     local displayName = read()
     print("Which NODE does this item belong to?")
     for i = 1, #nodes do

@@ -30,6 +30,7 @@ local function takeItems(nodes, db)
     while inItemSelect do
         print("Which Item do you want?")
         local item = read() -- "minecraft:log 0" there isn't a way to solve this without massive hash table
+        -- the real problem isn't that the search term sucks, it's that remembering what to type is hard.
         if db[item] then
             inItemSelect = false
             -- Get which Node the item is in
@@ -65,9 +66,94 @@ local function setCustomSearch()
     -- Ask user for name of search then add search terms to array and save
     term.clear()
     term.setCursorPos(1, 1)
+    local inCustomSearch = true
+    while inCustomSearch do
+        print("1. Add Custom Search")
+        print("2. Remove Custom Search")
+        local option = read()
+        if option == "1" then
+            local categories = {}
+            if fs.exists("customsearches.cfg") then
+                -- config exists, prepare to load data
+                print("Detected existence of existing configuration.")
+                local searchcfg = assert(fs.open("customsearches.cfg", "r"), "Error: Couldn't load config")
+                local inData = searchcfg.readAll()
+                searchcfg.close()
+
+                categories = textutils.unserialize(inData)
+                --array where key is categoryName and element is subArray holding list of keys for items
+            else
+                -- create the config file
+                local searchconfig = assert(fs.open("customsearches.cfg", "w"), "Error: Could not create customsearches.cfg")
+                searchconfig.close()
+            end
+            -- Start interrogation
+            print("Name your search category.")
+            local category = read()
+            local addingKeys = true
+            local keys = {}
+            while addingKeys do
+                print("Add a key to this category: ")
+                local key = read()
+                table.insert(keys, key)
+                local deciding = true
+                while deciding do
+                    print("1. Add another key")
+                    print("2. Done")
+                    local op = read()
+                    if op == "1" then
+                        deciding = false
+                        break
+                    elseif op == "2" then
+                        addingKeys = false
+                        deciding = false
+                        break
+                    else
+                        print("Invalid option!")
+                    end
+                end
+                -- done adding keys, pack up data and save it
+                categories[category] = keys
+                local outData = textutils.serialize(categories)
+                local searchFile = assert(fs.open("customsearches.cfg", "w"), "Error: Couldn't open customsearches.cfg")
+                searchFile.write(outData)
+                searchFile.close()
+            end
+        elseif option == "2" then
+            local customsearches
+            if fs.exists("customsearches.cfg") then
+                -- config exists, prepare to load data
+                print("Detected existence of existing configuration.")
+                local searchcfg = assert(fs.open("customsearches.cfg", "r"), "Error: Couldn't load config")
+                local inData = searchcfg.readAll()
+                searchcfg.close()
+
+                customsearches = textutils.unserialize(inData)
+                --array where key is categoryName and element is subArray holding list of keys for items
+            else
+                -- create the config file
+                local searchconfig = assert(fs.open("customsearches.cfg", "w"), "Error: Could not create customsearches.cfg")
+                searchconfig.close()
+            end
+            -- List all categories
+            for k,v in pairs(customsearches) do
+                print(k)
+            end
+            print("Which category are you removing?")
+            local remove = read()
+            table.remove(customsearches, remove)
+            -- pack data and save
+            local f = assert(fs.open("customsearches.cfg", "w"), "Error, Couldn't open customsearches.cfg")
+            local d = textutils.serialize(customsearches)
+            f.write(d)
+            f.close()
+        else
+            print("Invalid option!")
+        end
+    end
 end
 
-local function viewCustomSearch()
+local function viewCustomSearch(db)
     -- Show data with only objects in the custom search
     term.clear()
     term.setCursorPos(1, 1)
@@ -135,7 +221,7 @@ while inMenu do
         setCustomSearch()
     elseif option == 6 then
         -- View Custom Search
-        viewCustomSearch()
+        viewCustomSearch(db)
     elseif option == 7 then
         -- Exit
         print("Goodbye.")

@@ -87,7 +87,7 @@ local function itemDef(nodes, logging, turtle)
         local itemSide = metadata[1][4]
         local signalStrength = metadata[1][5]
         local count = metadata[1][6]
-        db[nameScheme] = {displayName, itemNode, itemSide, signalStrength, count}
+        db[displayName] = {nameScheme, itemNode, itemSide, signalStrength, count}
         -- write data to file
         local f = assert(fs.open("cachedata.db", "w"), "Error: Couldn't open handle to cachedata.db")
         dat = textutils.serialize(db)
