@@ -50,10 +50,13 @@ local function takeItems(nodes, db)
     end
 end
 
-local function viewStorage()
+local function viewStorage(db)
     -- Do the pagination stuff
     term.clear()
     term.setCursorPos(1, 1)
+    for k, v in pairs(db) do
+        print(k..v[5])
+    end
 end
 
 local function searchStorage()
@@ -157,6 +160,26 @@ local function viewCustomSearch(db)
     -- Show data with only objects in the custom search
     term.clear()
     term.setCursorPos(1, 1)
+    local customsearches
+    if fs.exists("customsearches.cfg") then
+        -- config exists, prepare to load data
+        print("Detected existence of existing configuration.")
+        local searchcfg = assert(fs.open("customsearches.cfg", "r"), "Error: Couldn't load config")
+        local inData = searchcfg.readAll()
+        searchcfg.close()
+        customsearches = textutils.unserialize(inData)
+
+        -- view our data
+        print("Which category are you searching?")
+        for k,v in pairs(customsearches) do
+            print(k)
+        end
+        local searchcat = read()
+        for i = 1, #customsearches[searchcat] do
+            print(customsearches[searchcat][i].." "..db[searchcat][5])
+        end
+    else
+        print("File not found: customsearches.cfg Exiting...")
 end
 
 -- == Driver Code ==
@@ -212,7 +235,7 @@ while inMenu do
         takeItems(nodes, db)
     elseif option == 3 then
         -- View Storage
-        viewStorage()
+        viewStorage(db)
     elseif option == 4 then
         -- Search Storage
         searchStorage()
