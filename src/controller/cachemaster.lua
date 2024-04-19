@@ -59,10 +59,25 @@ local function viewStorage(db)
     end
 end
 
-local function searchStorage()
-    -- Do Cosine Similarity Search
+local function partialKeySearch(uinput, hashTable)
+    local results = {}
+    for key, value in pairs(hashTable) do
+        if string.find(key:lower(), uinput:lower(), 1, true) then
+            results[key] = value
+        end
+    end
+    return results
+end
+
+local function searchStorage(db)
     term.clear()
     term.setCursorPos(1, 1)
+    print("Enter search term: ")
+    local uinput = read()
+    local searchResults = partialKeySearch(uinput)
+    for k, v in pairs(searchResults) do
+        print(k.." - "..value[5])
+    end
 end
 
 local function setCustomSearch()
@@ -238,7 +253,7 @@ while inMenu do
         viewStorage(db)
     elseif option == 4 then
         -- Search Storage
-        searchStorage()
+        searchStorage(db)
     elseif option == 5 then
         -- Setup Custom Search
         setCustomSearch()
