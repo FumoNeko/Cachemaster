@@ -54,8 +54,8 @@ local function itemDef(nodes, logging, turtle)
     print("Proceed to the Scanner Turtle and follow the instructions.")
     -- send the node data so that the turtle can operate and await instruction
     local nodeData = textutils.serialize(nodes)
-    rednet.send(turtle.id, nodeData, "itemconfig")
-    local senderID, senderMessage = rednet.receive("itemconfig")
+    rednet.send(turtle.id, nodeData, "itemconfig") -- TURTLE cacheconfigmode.lua line 30
+    local senderID, senderMessage = rednet.receive("itemconfig") -- TURTLE cacheconfigmode.lua line 87
     -- got data back, write to db
     if senderID == turtle.id then
         local metadata = textutils.unserialize(senderMessage)

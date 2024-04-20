@@ -1,12 +1,55 @@
 -- handle input output and logging
 
+local function writeConf(d, fileName)
+    local f = assert(fs.open(fileName, "w"), "Error: Couldn't open handle to "..fileName)
+    local o = textutils.serialize(d)
+    f.write(o)
+    f.close()
+end
+
+local function centerWrite(text)
+    local width, height = term.getSize()
+    local x, y = term.getCursorPos()
+    term.setCursorPos(math.ceil((width / 2) - (text:len() / 2)), y)
+    term.write(text)
+end
+
+local function assertFile(fileName, requiresSetup, setupFile)
+    if fs.exists(fileName) then
+        -- config exists, prepare to load data
+        print("Detected existence of existing configuration.")
+        local handle = assert(fs.open(fileName, "r"), "Error: Couldn't load file "..fileName)
+        local inData = handle.readAll()
+        handle.close()
+        local outData = textutils.unserialize(inData)
+        return outData
+    else
+        if requiresSetup then
+            -- abort, file must be populated elsewhere first
+            print("File not found. Run "..setupFile.." first before proceeding.")
+            return nil
+        else
+            -- create empty config file
+            local hnd = assert(fs.open(fileName, "w"), "Error: Could not create file "..fileName)
+            local empty = {}
+            hnd.write(textutils.serialize(empty))
+            hnd.close()
+            local h = assert(fs.open(fileName, "r"), "Error: Couldn't load file "..fileName)
+            local dat = h.readAll()
+            h.close()
+            local out = textutils.unserialize(dat)
+            return out
+        end
+    end
+end
+
 local function storeItems(db, turtle)
     -- Tell the turtle to scan the items from the input chest and extract them.
     term.clear()
     term.setCursorPos(1, 1)
-    rednet.send(turtle.id, "INPUT", "manage")
+    rednet.send(turtle.id, "INPUT", "manage") -- TURTLE cachescanmode.lua line 19
     local data
-    local senderID, senderMessage = rednet.receive("manage")
+    local senderID, senderMessage = rednet.receive("manage") -- TURTLE cachescanmode.lua line 41
     if senderID == turtle.id then
         data = textutils.unserialize(senderMessage)
         -- Add to the counts for each item in the db
@@ -15,10 +58,7 @@ local function storeItems(db, turtle)
         end
     end
     -- write the db data to file
-    local f = assert(fs.open("cachedata.db", "w"), "Error: Couldn't open database!")
-    local d = textutils.serialize(db)
-    f.write(d)
-    f.close()
+    writeConf(db, "cachedata.db")
     return db
 end
 
@@ -29,8 +69,7 @@ local function takeItems(nodes, db)
     local inItemSelect = true
     while inItemSelect do
         print("Which Item do you want?")
-        local item = read() -- "minecraft:log 0" there isn't a way to solve this without massive hash table
-        -- the real problem isn't that the search term sucks, it's that remembering what to type is hard.
+        local item = read() -- uses displayNames now, but still kind of daunting to remember names on the spot. A GUI would fix this.
         if db[item] then
             inItemSelect = false
             -- Get which Node the item is in
@@ -41,17 +80,19 @@ local function takeItems(nodes, db)
             local nodeOut = {itemSide, signalStrength}
             nodeOut = textutils.serialize(nodeOut)
             -- Send the signal to the node
-            rednet.send(nodeID, nodeOut, "IO")
+            rednet.send(nodeID, nodeOut, "IO") -- NODE cachelistener.lua line 32
             -- Reduce count value from DB
             db[item][5] = db[item[5]] - 64
+            writeConf(db, "cachedata.db")
+            return db
         else
             print("No Such item in database!")
+            return db
         end
     end
 end
 
 local function viewStorage(db)
-    -- Do the pagination stuff
     term.clear()
     term.setCursorPos(1, 1)
     for k, v in pairs(db) do
@@ -90,21 +131,8 @@ local function setCustomSearch()
         print("2. Remove Custom Search")
         local option = read()
         if option == "1" then
-            local categories = {}
-            if fs.exists("customsearches.cfg") then
-                -- config exists, prepare to load data
-                print("Detected existence of existing configuration.")
-                local searchcfg = assert(fs.open("customsearches.cfg", "r"), "Error: Couldn't load config")
-                local inData = searchcfg.readAll()
-                searchcfg.close()
-
-                categories = textutils.unserialize(inData)
-                --array where key is categoryName and element is subArray holding list of keys for items
-            else
-                -- create the config file
-                local searchconfig = assert(fs.open("customsearches.cfg", "w"), "Error: Could not create customsearches.cfg")
-                searchconfig.close()
-            end
+            --array where key is categoryName and element is subArray holding list of keys for items
+            local categories = assertFile("customsearches.cfg")
             -- Start interrogation
             print("Name your search category.")
             local category = read()
@@ -132,27 +160,10 @@ local function setCustomSearch()
                 end
                 -- done adding keys, pack up data and save it
                 categories[category] = keys
-                local outData = textutils.serialize(categories)
-                local searchFile = assert(fs.open("customsearches.cfg", "w"), "Error: Couldn't open customsearches.cfg")
-                searchFile.write(outData)
-                searchFile.close()
+                writeConf(categories, "customsearches.cfg")
             end
         elseif option == "2" then
-            local customsearches
-            if fs.exists("customsearches.cfg") then
-                -- config exists, prepare to load data
-                print("Detected existence of existing configuration.")
-                local searchcfg = assert(fs.open("customsearches.cfg", "r"), "Error: Couldn't load config")
-                local inData = searchcfg.readAll()
-                searchcfg.close()
-
-                customsearches = textutils.unserialize(inData)
-                --array where key is categoryName and element is subArray holding list of keys for items
-            else
-                -- create the config file
-                local searchconfig = assert(fs.open("customsearches.cfg", "w"), "Error: Could not create customsearches.cfg")
-                searchconfig.close()
-            end
+            local customsearches = assertFile("customsearches.cfg")
             -- List all categories
             for k,v in pairs(customsearches) do
                 print(k)
@@ -161,10 +172,7 @@ local function setCustomSearch()
             local remove = read()
             table.remove(customsearches, remove)
             -- pack data and save
-            local f = assert(fs.open("customsearches.cfg", "w"), "Error, Couldn't open customsearches.cfg")
-            local d = textutils.serialize(customsearches)
-            f.write(d)
-            f.close()
+            writeConf(customsearches, "customsearches.cfg")
         else
             print("Invalid option!")
         end
@@ -175,26 +183,19 @@ local function viewCustomSearch(db)
     -- Show data with only objects in the custom search
     term.clear()
     term.setCursorPos(1, 1)
-    local customsearches
-    if fs.exists("customsearches.cfg") then
-        -- config exists, prepare to load data
-        print("Detected existence of existing configuration.")
-        local searchcfg = assert(fs.open("customsearches.cfg", "r"), "Error: Couldn't load config")
-        local inData = searchcfg.readAll()
-        searchcfg.close()
-        customsearches = textutils.unserialize(inData)
-
-        -- view our data
-        print("Which category are you searching?")
-        for k,v in pairs(customsearches) do
-            print(k)
-        end
-        local searchcat = read()
-        for i = 1, #customsearches[searchcat] do
-            print(customsearches[searchcat][i].." "..db[searchcat][5])
-        end
+    local customsearches = assertFile("customsearches.cfg", true, "Setup Custom Search")
+    if customsearches == nil then
     else
-        print("File not found: customsearches.cfg Exiting...")
+        -- view our data
+            print("Which category are you searching?")
+            for k,v in pairs(customsearches) do
+                print(k)
+            end
+            local searchcat = read()
+            for i = 1, #customsearches[searchcat] do
+                print(customsearches[searchcat][i].." "..db[searchcat][5])
+            end
+    end
 end
 
 -- == Driver Code ==
@@ -205,27 +206,17 @@ local nodes
 local logging
 local turtle
 
-if fs.exists("cacheconfig.cfg") then
-    print("Detected configuration file.")
-    local cfg = assert(fs.open("cacheconfig.cfg", "r"), "Error: Couldn't load config!")
-    local inData = cfg.readAll()
-    cfg.close()
-    local configData = textutils.unserialize(inData)
+local configData = assertFile("cacheconfig.cfg", true, "cachesetup.lua")
+if configData == nil then
+    error("Run cachesetup.lua first!")
+else
     nodes = configData[1]
     logging = configData[2]
     turtle = configData[3]
-else
-    error("Configuration file does not exist. Run cachesetup.lua first.")
 end
 
-local db
-if fs.exists("cachedata.db") then
-    print("Detected Database file.")
-    local h = assert(fs.open("cachedata.db", "r"), "Error: Couldn't load Database!")
-    local in_ = h.readAll()
-    h.close()
-    db = textutils.unserialize(in_)
-else
+local db = assertFile("cachedata.db", true, "cachesetup.lua")
+if db == nil then
     error("Database file does not exist. Run cachesetup.lua first.")
 end
 

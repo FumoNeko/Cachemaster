@@ -29,7 +29,7 @@ end
 -- put node in listen mode and wait for instructions from controller
 local listening = true
 while listening do
-    local senderID, senderMessage = rednet.receive("IO")
+    local senderID, senderMessage = rednet.receive("IO") -- CONTROLLER cachemaster.lua takeItems() line 83
     if senderID == controller.id then
         -- Unpack data and output the signal [1] itemSide [2] signalStrength
         local data = textutils.unserialize(senderMessage)

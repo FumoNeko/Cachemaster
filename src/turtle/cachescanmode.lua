@@ -16,7 +16,7 @@ end
 
 local listening = true
 while listening do
-    local senderID, senderMessage = rednet.receive("manage")
+    local senderID, senderMessage = rednet.receive("manage") -- CONTROLLER cachemaster.lua storeItems() line 50
     if senderID == controller.id and senderMessage == "INPUT" then
         --start the scan process
         turtle.suckDown()
@@ -38,6 +38,6 @@ while listening do
     
         -- send the data
         data = textutils.serialize(data)
-        rednet.send(controller.id, data, "manage")
+        rednet.send(controller.id, data, "manage") -- CONTROLLER cachemaster.lua storeItems() line 52
     end
 end

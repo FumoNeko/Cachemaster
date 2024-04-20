@@ -27,7 +27,7 @@ else
 end
 
 -- Put turtle in listen state
-local senderID, nodeData = rednet.receive("itemconfig")
+local senderID, nodeData = rednet.receive("itemconfig") -- CONTROLLER cachesetup.lua line 57
 if senderID == controller.id then -- controller.id is nil?
     -- prepare the scanning operation
     local nodes = textutils.unserialize(nodeData)
@@ -84,7 +84,7 @@ if senderID == controller.id then -- controller.id is nil?
     table.insert(metadata, {nameScheme, displayName, itemNode, itemSide, signalStrength, count})
     metadata = textutils.serialize(metadata)
     -- send the data back
-    rednet.send(controller.id, metadata, "itemconfig")
+    rednet.send(controller.id, metadata, "itemconfig") -- CONTROLLER cachesetup.lua line 58
 else
     error("Network Integrity check failed, stopping...")
 end
