@@ -43,6 +43,133 @@ local function assertFile(fileName, requiresSetup, setupFile)
     end
 end
 
+local function drawMainMenu(select)
+    local w, h = term.getSize() -- w51 h18
+    term.clear()
+    term.setCursorPos(1,1)
+    centerWrite("Main Menu")
+    term.setCursorPos(1,2)
+    centerWrite(string.rep("-",w))
+    local options = {"Input Items Into Storage", "Output Item From Storage", "View Storage", "Search Storage", "Setup Custom Search", "View Custom Search", "Exit"}
+    -- Highlight the currently selected string
+    options[select] = "[ "..options[select].." ]"
+    -- draw options
+    term.setCursorPos(1,5)
+    centerWrite(options[1])
+    term.setCursorPos(1,7)
+    centerWrite(options[2])
+    term.setCursorPos(1,9)
+    centerWrite(options[3])
+    term.setCursorPos(1,11)
+    centerWrite(options[4])
+    term.setCursorPos(1,13)
+    centerWrite(options[5])
+    term.setCursorPos(1,15)
+    centerWrite(options[6])
+    term.setCursorPos(1,17)
+    centerWrite(options[7])
+    -- keyboard controls
+    -- UP = 200, DOWN = 208, ENTER = 28
+    local id, key = os.pullEvent("key")
+    if key == 200 then
+        if select <= 1 then
+            select = 7
+            return select
+        else
+            select = select - 1
+            return select
+        end
+    elseif key == 208 then
+        if select >= 7 then
+            select = 1
+            return select
+        else
+            select = select + 1
+            return select
+        end
+    elseif key == 28 then
+        local proceeding = true
+        return select, proceeding
+    end
+end
+
+local function drawSetCustomSearch(select, inSubMenu)
+    local w, h = term.getSize() -- w51 h18
+    term.clear()
+    term.setCursorPos(1,1)
+    centerWrite("Set Custom Search")
+    term.setCursorPos(1,2)
+    centerWrite(string.rep("-",w))
+    local options = {"Add Custom Search", "Remove Custom Search"}
+    local suboptions = {"Add Another Key", "Done"}
+    -- highlight currently selected string
+    options[select] = "[ "..options[select].." ]"
+    suboptions[select] = "[ "..suboptions[select].." ]"
+    if inSubMenu then
+        -- draw subMenu
+        term.setCursorPos(1, 8)
+        centerWrite(suboptions[1])
+        term.setCursorPos(1, 11)
+        centerWrite(suboptions[2])
+        -- keyboard controls
+        -- UP = 200, DOWN = 208, ENTER = 28
+        local id, key = os.pullEvent("key")
+        if key == 200 then
+            if select <= 1 then
+                select = 2
+                return select
+            else
+                select = select - 1
+                return select
+            end
+        elseif key == 208 then
+            if select >= 2 then
+                select = 1
+                return select
+            else
+                select = select + 1
+                return select
+            end
+        elseif key == 28 then
+            local proceeding = true
+            term.clear()
+            term.setCursorPos(1,1)
+            return select, proceeding
+        end
+    else
+        -- draw menu
+        term.setCursorPos(1, 8)
+        centerWrite(options[1])
+        term.setCursorPos(1, 11)
+        centerWrite(options[2])
+        -- keyboard controls
+        -- UP = 200, DOWN = 208, ENTER = 28
+        local id, key = os.pullEvent("key")
+        if key == 200 then
+            if select <= 1 then
+                select = 2
+                return select
+            else
+                select = select - 1
+                return select
+            end
+        elseif key == 208 then
+            if select >= 2 then
+                select = 1
+                return select
+            else
+                select = select + 1
+                return select
+            end
+        elseif key == 28 then
+            local proceeding = true
+            term.clear()
+            term.setCursorPos(1,1)
+            return select, proceeding
+        end
+    end
+end
+
 local function storeItems(db, turtle)
     -- Tell the turtle to scan the items from the input chest and extract them.
     term.clear()
@@ -95,8 +222,8 @@ end
 local function viewStorage(db)
     term.clear()
     term.setCursorPos(1, 1)
-    for k, v in pairs(db) do
-        print(k..v[5])
+    for k, v in pairs(db) do -- NEEDS GUI REFACTOR LATER
+        print(k.." "..v[5])
     end
 end
 
@@ -116,8 +243,8 @@ local function searchStorage(db)
     print("Enter search term: ")
     local uinput = read()
     local searchResults = partialKeySearch(uinput)
-    for k, v in pairs(searchResults) do
-        print(k.." - "..value[5])
+    for k, v in pairs(searchResults) do -- NEEDS GUI REFACTOR LATER
+        print(k.." - "..v[5])
     end
 end
 
@@ -125,56 +252,60 @@ local function setCustomSearch()
     -- Ask user for name of search then add search terms to array and save
     term.clear()
     term.setCursorPos(1, 1)
+    local select, proceeding = drawSetCustomSearch(1)
     local inCustomSearch = true
     while inCustomSearch do
-        print("1. Add Custom Search")
-        print("2. Remove Custom Search")
-        local option = read()
-        if option == "1" then
-            --array where key is categoryName and element is subArray holding list of keys for items
-            local categories = assertFile("customsearches.cfg")
-            -- Start interrogation
-            print("Name your search category.")
-            local category = read()
-            local addingKeys = true
-            local keys = {}
-            while addingKeys do
-                print("Add a key to this category: ")
-                local key = read()
-                table.insert(keys, key)
-                local deciding = true
-                while deciding do
-                    print("1. Add another key")
-                    print("2. Done")
-                    local op = read()
-                    if op == "1" then
-                        deciding = false
-                        break
-                    elseif op == "2" then
-                        addingKeys = false
-                        deciding = false
-                        break
-                    else
-                        print("Invalid option!")
+        if proceeding then
+            if select == 1 then
+                --array where key is categoryName and element is subArray holding list of keys for items
+                local categories = assertFile("customsearches.cfg")
+                -- Start interrogation
+                print("Name your search category.")
+                local category = read()
+                local addingKeys = true
+                local keys = {}
+                while addingKeys do
+                    print("Add a key to this category: ")
+                    local key = read()
+                    table.insert(keys, key)
+                    local deciding = true
+                    local opt, continuing = drawSetCustomSearch(1, true)
+                    while deciding do
+                        if continuing then
+                            if opt == 1 then
+                                deciding = false
+                                continuing = nil
+                                break
+                            elseif opt == 2 then
+                                addingKeys = false
+                                deciding = false
+                                continuing = nil
+                                break
+                            end
+                        else
+                            opt, continuing = drawSetCustomSearch(opt, true)
+                        end
                     end
+                    -- done adding keys, pack up data and save it
+                    categories[category] = keys
+                    writeConf(categories, "customsearches.cfg")
                 end
-                -- done adding keys, pack up data and save it
-                categories[category] = keys
-                writeConf(categories, "customsearches.cfg")
+            elseif select == 2 then
+                local customsearches = assertFile("customsearches.cfg")
+                -- List all categories NEEDS GUI REFACTOR LATER
+                for k,v in pairs(customsearches) do
+                    print(k)
+                end
+                print("Which category are you removing?")
+                local remove = read()
+                table.remove(customsearches, remove)
+                -- pack data and save
+                writeConf(customsearches, "customsearches.cfg")
+            else
+                print("Invalid option!")
             end
-        elseif option == "2" then
-            local customsearches = assertFile("customsearches.cfg")
-            -- List all categories
-            for k,v in pairs(customsearches) do
-                print(k)
-            end
-            print("Which category are you removing?")
-            local remove = read()
-            table.remove(customsearches, remove)
-            -- pack data and save
-            writeConf(customsearches, "customsearches.cfg")
         else
-            print("Invalid option!")
+            select, proceeding = drawSetCustomSearch(select, proceeding)
         end
     end
 end
@@ -186,7 +317,7 @@ local function viewCustomSearch(db)
     local customsearches = assertFile("customsearches.cfg", true, "Setup Custom Search")
     if customsearches == nil then
     else
-        -- view our data
+        -- view our data NEEDS GUI REFACTOR LATER
             print("Which category are you searching?")
             for k,v in pairs(customsearches) do
                 print(k)
@@ -221,39 +352,42 @@ if db == nil then
 end
 
 -- Main menu
+local select, continuing = drawMainMenu(1)
 local inMenu = true 
 while inMenu do
-    print("Welcome to the CacheMaster Interface! Please select an option:")
-    print("1. Input Items into Storage")
-    print("2. Output Item From Storage")
-    print("3. View Storage")
-    print("4. Search Storage")
-    print("5. Setup Custom Search")
-    print("6. View Custom Search")
-    print("7. Exit")
-    local option = read()
-    option = tonumber(option) -- do error check here
-    if option == 1 then
-        -- Input Items into Storage
-        db = storeItems(db, turtle)
-    elseif option == 2 then
-        -- Output Item from Storage
-        takeItems(nodes, db)
-    elseif option == 3 then
-        -- View Storage
-        viewStorage(db)
-    elseif option == 4 then
-        -- Search Storage
-        searchStorage(db)
-    elseif option == 5 then
-        -- Setup Custom Search
-        setCustomSearch()
-    elseif option == 6 then
-        -- View Custom Search
-        viewCustomSearch(db)
-    elseif option == 7 then
-        -- Exit
-        print("Goodbye.")
-        inMenu = false
-    end
+    if continuing then
+        if select == 1 then
+            -- Input Items into Storage
+            db = storeItems(db, turtle)
+            continuing = nil
+        elseif select == 2 then
+            -- Output Item from Storage
+            takeItems(nodes, db)
+            continuing = nil
+        elseif select == 3 then
+            -- View Storage
+            viewStorage(db)
+            continuing = nil
+        elseif select == 4 then
+            -- Search Storage
+            searchStorage(db)
+            continuing = nil
+        elseif select == 5 then
+            -- Setup Custom Search
+            setCustomSearch()
+            continuing = nil
+        elseif select == 6 then
+            -- View Custom Search
+            viewCustomSearch(db)
+            continuing = nil
+        elseif select == 7 then
+            -- Exit
+            term.clear()
+            term.setCursorPos(1,1)
+            print("Goodbye.")
+            continuing = nil
+            inMenu = false
+        end
+    else
+        select, continuing = drawMainMenu(select)
 end

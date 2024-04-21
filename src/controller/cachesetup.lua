@@ -1,7 +1,5 @@
 -- This file handles adding modules to the database
 
--- the items table is unused, should probably remove it.
-
 local function writeConf(nodes, logging, turtle)
     local f = assert(fs.open("cacheconfig.cfg", "w"), "Error: Couldn't open handle to cacheconfig.cfg")
     local d = {nodes, logging, turtle}
@@ -10,40 +8,93 @@ local function writeConf(nodes, logging, turtle)
     f.close()
 end
 
+local function centerWrite(text)
+    local width, height = term.getSize()
+    local x, y = term.getCursorPos()
+    term.setCursorPos(math.ceil((width / 2) - (text:len() / 2)), y)
+    term.write(text)
+end
+
+local function drawNodeMenu(select)
+    local w,h = term.getSize() -- w51, h18
+    term.clear()
+    term.setCursorPos(1,1)
+    centerWrite("Node Menu")
+    term.setCursorPos(1,2)
+    centerWrite(string.rep("-",w))
+    local options = {"Add Node", "Remove Node", "Return to Setup Menu"}
+    -- Highlight the currently selected string
+    options[select] = "[ "..options[select].." ]"
+    -- draw options
+    term.setCursorPos(1,9)
+    centerWrite(options[1])
+    term.setCursorPos(1,11)
+    centerWrite(options[2])
+    term.setCursorPos(1,13)
+    centerWrite(options[3])
+    -- keyboard controls
+    -- UP = 200, DOWN = 208, ENTER = 28
+    local id, key = os.pullEvent("key")
+    if key == 200 then
+        if select <=1 then
+            select = 3
+            return select
+        else
+            select = select - 1
+            return select
+        end
+    elseif key == 208 then
+        if select >=3 then
+            select = 1
+            return select
+        else
+            select = select + 1
+            return select
+        end
+    elseif key == 28 then
+        local proceeding = true
+        return select, proceeding
+    end
+end
+
 local function nodeDef(nodes, logging, turtle)
     term.clear()
     term.setCursorPos(1, 1)
+    local select, continuing = drawNodeMenu(1)
     local inNodeMenu = true
     while inNodeMenu do
-        print("1. Add Node")
-        print("2. Remove Node")
-        print("3. Return to Main Menu")
-        local option = read()
-        option = tonumber(option)
-        if option == 1 then
+        if continuing then
+            if select == 1 then
             -- Add Node
-            local len = #nodes + 1
-            print("What is the Computer ID of this node?")
-            local id = read()
-            id = tonumber(id) -- do error checking here in future
-            print("What is the Name of this node?")
-            local name = read()
-            table.insert(nodes, {id = id, name = name})
-            writeConf(nodes, logging, turtle)
-        elseif option == 2 then
+                local len = #nodes + 1
+                print("What is the Computer ID of this node?")
+                local id = read()
+                id = tonumber(id) -- do error checking here in future
+                print("What is the Name of this node?")
+                local name = read()
+                table.insert(nodes, {id = id, name = name})
+                writeConf(nodes, logging, turtle)
+                continuing = nil
+            elseif select == 2 then
             -- Remove Node
-            print("Which node is to be removed?")
-            for i = 1, #nodes do
-                print(i..". ID: "..nodes[i]["id"].." Name: "..nodes[i]["name"])
+                print("Which node is to be removed?")
+                for i = 1, #nodes do
+                    print(i..". ID: "..nodes[i]["id"].." Name: "..nodes[i]["name"])
+                end
+                local removeNode = read() -- do error checking here in future
+                removeNode = tonumber(removeNode)
+                table.remove(nodes, removeNode)
+                writeConf(nodes, logging, turtle)
+                continuing = nil
+            elseif select == 3 then
+                term.clear()
+                term.setCursorPos(1,1)
+                continuing = nil
+                inNodeMenu = false
+                return
             end
-            local removeNode = read() -- do error checking here in future
-            removeNode = tonumber(removeNode)
-            table.remove(nodes, removeNode)
-            writeConf(nodes, logging, turtle)
-        elseif option == 3 then
-            return
         else
-            print("Invalid option!")
+            select, continuing = drawNodeMenu(select)
         end
     end
 end
@@ -133,6 +184,52 @@ local function scanDef(nodes, logging, turtle)
     writeConf(nodes, logging, turtle)
 end
 
+local function drawMainMenu(select)
+    local w, h = term.getSize() -- w51 h18
+    term.clear()
+    term.serCursorPos(1,1)
+    centerWrite("Setup Menu")
+    term.setCursorPos(1,2)
+    centerWrite(string.rep("-",w))
+    local options = {"Add/Remove Node", "Add/Remove Item Definition", "Enable/Disable Logging", "Add/Remove Scanner Turtle", "Exit"}
+    -- Highlight the currently selected string
+    options[select] = "[ "..options[select].." ]"
+    -- draw options
+    term.setCursorPos(1,7)
+    centerWrite(options[1])
+    term.setCursorPos(1,9)
+    centerWrite(options[2])
+    term.setCursorPos(1,11)
+    centerWrite(options[3])
+    term.setCursorPos(1,13)
+    centerWrite(options[4])
+    term.setCursorPos(1,15)
+    centerWrite(options[5])
+    -- keyboard controls
+    -- UP = 200, DOWN = 208, ENTER = 28
+    local id, key = os.pullEvent("key")
+    if key == 200 then
+        if select <= 1 then
+            select = 5
+            return select
+        else
+            select = select - 1
+            return select
+        end
+    elseif key == 208 then
+        if select >= 5 then
+            select = 1
+            return select
+        else
+            select = select + 1
+            return select
+        end
+    elseif key == 28 then
+        local proceeding = true
+        return select, proceeding
+    end
+end
+
 -- == Driver code ==
 -- initial setup and variable initialization
 rednet.open("back")
@@ -159,28 +256,30 @@ else
 end
 
 -- Menu
+local select, continuing = drawMainMenu(1)
 local inMenu = true
 while inMenu do
-    print("Welcome to Cachemaster setup! Please select an option.")
-    print("1. Add/Remove Node")
-    print("2. Add/Remove Item Definition")
-    print("3. Enable/Disable Logging")
-    print("4. Add/Remove Scanner Turtle")
-    print("5. Exit")
-    local menuChoice = read()
-    menuChoice = tonumber(menuChoice)
-    if menuChoice == 1 then
-        nodeDef(nodes, logging, turtle)
-    elseif menuChoice == 2 then
-        itemDef(nodes, logging, turtle)
-    elseif menuChoice == 3 then
-        loggingctl(nodes, logging, turtle)
-    elseif menuChoice == 4 then
-        scanDef(nodes, logging, turtle)
-    elseif menuChoice == 5 then
-        print("Goodbye.")
-        inMenu = false
+    if continuing then
+        if select == 1 then
+            nodeDef(nodes, logging, turtle)
+            continuing = nil
+        elseif select == 2 then
+            itemDef(nodes, logging, turtle)
+            continuing = nil
+        elseif select == 3 then
+            loggingctl(nodes, logging, turtle)
+            continuing = nil
+        elseif select == 4 then
+            scanDef(nodes, logging, turtle)
+            continuing = nil
+        elseif select == 5 then
+            term.clear()
+            term.setCursorPos(1,1)
+            print("Goodbye.")
+            continuing = nil
+            inMenu = false
+        end
     else
-        print("Invalid input!")
+        select, continuing = drawMainMenu(select)
     end
 end

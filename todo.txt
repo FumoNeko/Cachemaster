@@ -1,4 +1,2 @@
 cachemaster.lua line 93 refactor viewStorage()
 cachemaster.lua line 180 refactor viewCustomSearch
-
-cachemaster.lua refactor menu system with termGUI system.
