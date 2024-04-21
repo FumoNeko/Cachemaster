@@ -27,6 +27,7 @@ local function assertFile(fileName, requiresSetup, setupFile)
         if requiresSetup then
             -- abort, file must be populated elsewhere first
             print("File not found. Run "..setupFile.." first before proceeding.")
+            error("Populate file first.")
             return nil
         else
             -- create empty config file
