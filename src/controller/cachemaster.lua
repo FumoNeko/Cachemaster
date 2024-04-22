@@ -1,3 +1,4 @@
+---@diagnostic disable: undefined-global, undefined-field, param-type-mismatch
 -- handle input output and logging
 
 local function writeConf(d, fileName)
@@ -391,4 +392,5 @@ while inMenu do
         end
     else
         select, continuing = drawMainMenu(select)
+    end
 end

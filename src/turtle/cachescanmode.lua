@@ -20,13 +20,13 @@ while listening do
     if senderID == controller.id and senderMessage == "INPUT" then
         --start the scan process
         turtle.suckDown()
-        itemCount = turtle.getItemCount(1)
+        local itemCount = turtle.getItemCount(1)
         local data = {}
         while itemCount ~= 0 do
             local item = turtle.getItemDetail()
             if item then
-                damage = tostring(item.damage)
-                nameScheme = item.name.." "..damage
+                local damage = tostring(item.damage)
+                local nameScheme = item.name.." "..damage
                 data[nameScheme] = item.count
             else
                 print("no items!")

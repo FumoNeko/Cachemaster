@@ -141,7 +141,7 @@ local function itemDef(nodes, logging, turtle)
         db[displayName] = {nameScheme, itemNode, itemSide, signalStrength, count}
         -- write data to file
         local f = assert(fs.open("cachedata.db", "w"), "Error: Couldn't open handle to cachedata.db")
-        dat = textutils.serialize(db)
+        local dat = textutils.serialize(db)
         f.write(dat)
         f.close()
     else

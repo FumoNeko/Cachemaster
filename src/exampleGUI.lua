@@ -1,0 +1,45 @@
+local function centerWrite(text)
+  local width, height = term.getSize()
+  local x, y = term.getCursorPos()
+  term.setCursorPos(math.ceil((width / 2) - (text:len() / 2)), y)
+  term.write(text)
+end
+term.setBackgroundColor(colors.blue)
+term.clear()
+term.setCursorPos(1,1)
+centerWrite("STORAGE")
+term.setCursorPos(1,2)
+local w,h = term.getSize()
+for i = 1, 7 do
+  term.setBackgroundColor(colors.gray)
+  print(string.rep(" ",w))
+  term.setBackgroundColor(colors.green)
+  print(string.rep(" ",w))
+end
+term.setBackgroundColor(colors.gray)
+print(string.rep(" ",w))
+
+term.setCursorPos(1,2)
+for i = 1, 7 do
+  term.setBackgroundColor(colors.gray)
+  print("data")
+  term.setBackgroundColor(colors.green)
+  print("data")
+end
+term.setBackgroundColor(colors.gray)
+print("data")
+
+term.setCursorPos(1,18)
+term.setTextColor(colors.black)
+term.setBackgroundColor(colors.yellow)
+centerWrite("Page 1")
+
+term.setCursorPos(20,18)
+print("<")
+term.setCursorPos(31, 18)
+print(">")
+term.setCursorPos(1, 18)
+term.setTextColor(colors.white)
+term.setBackgroundColor(colors.red)
+print("EXIT")
+term.setCursorPos(1,1)
