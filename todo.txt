@@ -1,2 +1,4 @@
 cachemaster.lua line 93 refactor viewStorage()
 cachemaster.lua line 180 refactor viewCustomSearch
+
+look for any weird global variable conflicts

@@ -221,12 +221,128 @@ local function takeItems(nodes, db)
     end
 end
 
+local function paginate(db)
+    local pages = {}
+    local currentPage = {}
+
+    for k,v in pairs(db) do
+        table.insert(currentPage, k) -- 15 keys per page as a subtable
+        if #currentPage == 15 then
+            table.insert(pages, currentPage) -- main table with each page subtable
+            currentPage = {}
+        end
+    end
+
+    if #currentPage > 0 then
+        table.insert(pages, currentPage)
+    end
+
+    return pages
+end
+
+local function drawStorage(currentPage)
+    term.setBackgroundColor(colors.blue)
+    term.clear()
+    -- header
+    term.setCursorPos(1,1)
+    term.write("ITEM")
+    centerWrite("STORAGE")
+    term.setCursorPos(44,1)
+    term.write("NUM")
+
+    -- background
+    term.setCursorPos(1,2)
+    local w,h = term.getSize()
+    for i = 1,7 do
+        term.setBackgroundColor(colors.gray)
+        print(string.rep(" ",w))
+        term.SetBackgroundColor(colors.green)
+        print(string.rep(" ",w))
+    end
+    term.SetBackgroundColor(colors.gray)
+    print(string.rep(" ",w))
+
+    -- footer --
+    -- page number
+    term.setCursorPos(1,18)
+    term.setTextColor(colors.black)
+    term.setBackgroundColor(colors.yellow)
+    centerWrite("Page "..currentPage)
+
+    -- page arrows and exit key
+    term.setCursorPos(20,18)
+    print("<")
+    term.setCursorPos(31,18)
+    print(">")
+    term.setCursorPos(1,18)
+    term.setTextColor(colors.white)
+    term.setBackgroundColor(colors.red)
+    print("EXIT")
+
+    -- set back to default settings
+    term.setCursorPos(1,1)
+    term.setBackgroundColor(colors.black)
+    term.setTextColor(colors.white)
+end
+
 local function viewStorage(db)
     term.clear()
     term.setCursorPos(1, 1)
-    for k, v in pairs(db) do -- NEEDS GUI REFACTOR LATER
-        print(k.." "..v[5])
+            -- for k, v in pairs(db) do -- NEEDS GUI REFACTOR LATER
+            --     print(k.." "..v[5])
+            -- end
+    -- paginate the database
+    local pages = paginate(db) -- pages[1] = array page 1; pages[1][1] = string page 1 key 1
+    local currentPage = 1
+    local inViewMode = true
+    drawStorage(currentPage)
+    while inViewMode do
+        -- draw database elements
+        term.setCursorPos(1,2)
+        for i = 1,7,2 do -- error check for nil values
+            term.setBackgroundColor(colors.gray)
+            print(pages[currentPage][i])
+            term.setBackgroundColor(colors.green)
+            print(pages[currentPage][i+1])
+        end
+        term.setBackgroundColor(colors.gray)
+        print(pages[currentPage][15])
+
+        -- draw counts for each element
+        --todo
+
+        -- button functionality
+        local event, button, x, y = os.pullEvent("mouse_click")
+        if y == 18 then
+            if x <= 4 then
+                -- exit button
+                term.setBackgroundColor(colors.black)
+                term.clear()
+                inViewMode = false
+                break
+            elseif x == 20 then
+                -- page down
+                if currentPage <= 1 then
+                    currentPage = #pages
+                else
+                    currentPage = currentPage + 1
+                end
+            elseif x == 31 then
+                -- page up
+                if currentPage >= #pages then
+                    currentPage = 1
+                else
+                    currentPage = currentPage + 1
+                end
+            end
+        end
+        drawStorage(currentPage)
     end
+    -- loop broken, reset to default
+    term.setBackgroundColor(colors.black)
+    term.setTextColor(colors.white)
+    term.clear()
+    term.setCursorPos(1,1)
 end
 
 local function partialKeySearch(uinput, hashTable)
