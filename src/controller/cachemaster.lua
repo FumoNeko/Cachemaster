@@ -189,7 +189,7 @@ local function storeItems(db, turtle)
         -- make a temp table, loop through db and store the nameScheme in temp
         local temp = {} -- look into making this a global lookup table for potential optimization
         for k,v in pairs(db) do
-            temp[v[1]] = k -- temp["minecraft:log 0"][1] = "oak wood"
+            temp[v[1]] = {k} -- temp["minecraft:log 0"] = {"oak wood"}
         end
         -- store the counts
         for k,v in pairs(data) do -- k = "minecraft:log 0" v = 1
