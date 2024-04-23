@@ -52,6 +52,8 @@ local function drawNodeMenu(select)
             return select
         end
     elseif key == 28 then
+        term.clear()
+        term.setCursorPos(1,1)
         local proceeding = true
         return select, proceeding
     end
