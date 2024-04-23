@@ -264,10 +264,10 @@ local function drawStorage(currentPage)
     for i = 1,7 do
         term.setBackgroundColor(colors.gray)
         print(string.rep(" ",w))
-        term.SetBackgroundColor(colors.green)
+        term.setBackgroundColor(colors.green)
         print(string.rep(" ",w))
     end
-    term.SetBackgroundColor(colors.gray)
+    term.setBackgroundColor(colors.gray)
     print(string.rep(" ",w))
 
     -- footer --
