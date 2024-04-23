@@ -331,7 +331,7 @@ local function viewStorage(db)
             end
             if pages[currentPage][i+1] then
                 term.setBackgroundColor(colors.green)
-                print(db[pages[currentPage[i]][5])
+                print(db[pages[currentPage][i]][5])
             end
         end
         if pages[currentPage][15] then

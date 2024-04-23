@@ -4,3 +4,5 @@ look for any weird global variable conflicts
 
 cachemaster.lua test draw function at 318
 general software testing
+
+cachesetup.lua bug - if cacheconfig.cfg exists without a nodes definition, nodes will be nil and error the program.
