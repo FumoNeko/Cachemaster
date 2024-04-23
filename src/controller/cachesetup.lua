@@ -66,7 +66,6 @@ local function nodeDef(nodes, logging, turtle)
         if continuing then
             if select == 1 then
             -- Add Node
-                local len = #nodes + 1
                 print("What is the Computer ID of this node?")
                 local id = read()
                 id = tonumber(id) -- do error checking here in future
