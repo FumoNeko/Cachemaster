@@ -299,17 +299,37 @@ local function viewStorage(db)
     while inViewMode do
         -- draw database elements
         term.setCursorPos(1,2)
-        for i = 1,7,2 do -- error check for nil values
-            term.setBackgroundColor(colors.gray)
-            print(pages[currentPage][i])
-            term.setBackgroundColor(colors.green)
-            print(pages[currentPage][i+1])
+        for i = 1,7,2 do
+            if pages[currentPage][i] then
+                term.setBackgroundColor(colors.gray)
+                print(pages[currentPage][i])
+            end
+            if pages[currentPage][i+1] then
+                term.setBackgroundColor(colors.green)
+                print(pages[currentPage][i+1])
+            end
         end
-        term.setBackgroundColor(colors.gray)
-        print(pages[currentPage][15])
+        if pages[currentPage][15] then
+            term.setBackgroundColor(colors.gray)
+            print(pages[currentPage][15])
+        end
 
         -- draw counts for each element
-        --todo
+        term.setCursorPos(44,2)
+        for i = 1,7,2 do
+            if pages[currentPage][i] then
+                term.setBackgroundColor(colors.gray)
+                print(db[pages[currentPage][i]][5])
+            end
+            if pages[currentPage][i+1] then
+                term.setBackgroundColor(colors.green)
+                print(db[pages[currentPage[i]][5])
+            end
+        end
+        if pages[currentPage][15] then
+            term.setBackgroundColor(colors.gray)
+            print(db[pages[currentPage][i]][15])
+        end
 
         -- button functionality
         local event, button, x, y = os.pullEvent("mouse_click")
