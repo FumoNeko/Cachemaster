@@ -35,7 +35,9 @@ while listening do
         local data = textutils.unserialize(senderMessage)
         local itemSide = data[1]
         local signalStrength = data[2]
+        print("sending signal to "..itemSide.." at strength "..signalStrength)
         redstone.setAnalogOutput(itemSide, signalStrength)
+        sleep(0.5)
         redstone.setAnalogOutput(itemSide, 0)
     end
 end
