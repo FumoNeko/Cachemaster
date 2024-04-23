@@ -388,10 +388,12 @@ local function searchStorage(db)
     term.setCursorPos(1, 1)
     print("Enter search term: ")
     local uinput = read()
-    local searchResults = partialKeySearch(uinput)
+    local searchResults = partialKeySearch(uinput, db)
     for k, v in pairs(searchResults) do -- NEEDS GUI REFACTOR LATER
         print(k.." - "..v[5])
     end
+    print("Press any key to continue...")
+    os.pullEvent("key")
 end
 
 local function setCustomSearch()
