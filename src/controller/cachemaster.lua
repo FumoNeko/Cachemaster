@@ -145,7 +145,7 @@ local function drawSetCustomSearch(select, inSubMenu)
         term.setCursorPos(1, 11)
         centerWrite(options[2])
         term.setCursorPos(1, 15)
-        centerWritE(options[3])
+        centerWrite(options[3])
         -- keyboard controls
         -- UP = 200, DOWN = 208, ENTER = 28
         local id, key = os.pullEvent("key")
