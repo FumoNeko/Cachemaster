@@ -102,7 +102,7 @@ local function drawSetCustomSearch(select, inSubMenu)
     centerWrite("Set Custom Search")
     term.setCursorPos(1,2)
     centerWrite(string.rep("-",w))
-    local options = {"Add Custom Search", "Remove Custom Search"}
+    local options = {"Add Custom Search", "Remove Custom Search", "Exit"}
     local suboptions = {"Add Another Key", "Done"}
     -- highlight currently selected string
     options[select] = "[ "..options[select].." ]"
@@ -144,19 +144,21 @@ local function drawSetCustomSearch(select, inSubMenu)
         centerWrite(options[1])
         term.setCursorPos(1, 11)
         centerWrite(options[2])
+        term.setCursorPos(1, 15)
+        centerWritE(options[3])
         -- keyboard controls
         -- UP = 200, DOWN = 208, ENTER = 28
         local id, key = os.pullEvent("key")
         if key == 200 then
             if select <= 1 then
-                select = 2
+                select = 3
                 return select
             else
                 select = select - 1
                 return select
             end
         elseif key == 208 then
-            if select >= 2 then
+            if select >= 3 then
                 select = 1
                 return select
             else
@@ -428,6 +430,7 @@ local function setCustomSearch()
                                 addingKeys = false
                                 deciding = false
                                 continuing = nil
+                                proceeding = nil
                                 break
                             end
                         else
@@ -449,8 +452,10 @@ local function setCustomSearch()
                 table.remove(customsearches, remove)
                 -- pack data and save
                 writeConf(customsearches, "customsearches.cfg")
-            else
-                print("Invalid option!")
+            elseif select == 3 then
+                proceeding = false
+                inCustomSearch = false
+                break
             end
         else
             select, proceeding = drawSetCustomSearch(select, proceeding)
