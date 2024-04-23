@@ -221,7 +221,7 @@ local function takeItems(nodes, db)
             -- Send the signal to the node
             rednet.send(nodeID, nodeOut, "IO") -- NODE cachelistener.lua line 32
             -- Reduce count value from DB
-            db[item][5] = db[item[5]] - 64
+            db[item][5] = db[item][5] - 64
             writeConf(db, "cachedata.db")
             return db
         else
