@@ -2,5 +2,5 @@ cachemaster.lua line 180 refactor viewCustomSearch
 
 look for any weird global variable conflicts
 
-test draw function at 318
+cachemaster.lua test draw function at 318
 general software testing

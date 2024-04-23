@@ -182,8 +182,16 @@ local function storeItems(db, turtle)
     if senderID == turtle.id then
         data = textutils.unserialize(senderMessage)
         -- Add to the counts for each item in the db
-        for k, v in pairs(data) do
-            db[k][5] = db[k][5] + v
+        -- we know data stores keys as data["minecraft:log 0"] = 1
+        -- we know db stores keys as db["oak wood"] = {"minecraft:log 0"...1}
+        -- make a temp table, loop through db and store the nameScheme in temp
+        local temp = {} -- look into making this a global lookup table for potential optimization
+        for k,v in pairs(db) do
+            temp[v[1]] = k -- temp["minecraft:log 0"][1] = "oak wood"
+        end
+        -- store the counts
+        for k,v in pairs(data) do -- k = "minecraft:log 0" v = 1
+            db[temp[k][1]][5] = db[temp[k][1]][5] + v -- db["oak wood"][5] = db["oak wood"][5] + 1
         end
     end
     -- write the db data to file
