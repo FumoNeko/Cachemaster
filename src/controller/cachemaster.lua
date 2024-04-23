@@ -103,7 +103,7 @@ local function drawSetCustomSearch(select, inSubMenu)
     term.setCursorPos(1,2)
     centerWrite(string.rep("-",w))
     local options = {"Add Custom Search", "Remove Custom Search", "Exit"}
-    local suboptions = {"Add Another Key", "Done"}
+    local suboptions = {"Add Another Key", "Done", ""}
     -- highlight currently selected string
     options[select] = "[ "..options[select].." ]"
     suboptions[select] = "[ "..suboptions[select].." ]"
