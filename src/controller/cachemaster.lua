@@ -473,13 +473,15 @@ local function viewCustomSearch(db)
         -- view our data NEEDS GUI REFACTOR LATER
             print("Which category are you searching?")
             for k,v in pairs(customsearches) do
-                print(k)
+                print(k) -- k = "Wood" v = {"Oak Log", "example"...}
             end
-            local searchcat = read()
-            for i = 1, #customsearches[searchcat] do
-                print(customsearches[searchcat][i].." "..db[searchcat][5])
+            local searchcat = read() -- ex: "Wood"
+            for i = 1, #customsearches[searchcat] do -- ex: customsearches["Wood"]
+                print(customsearches[searchcat][i].." "..db[customsearches[searchcat][i]][5]) -- ex: customsearches["Wood"][1] ("Oak Log") .. " " ..db["Oak Log"][5]
             end
     end
+    print("Press any key to continue...")
+    os.pullEvent("key")
 end
 
 -- == Driver Code ==
