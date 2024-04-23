@@ -187,7 +187,7 @@ end
 local function drawMainMenu(select)
     local w, h = term.getSize() -- w51 h18
     term.clear()
-    term.serCursorPos(1,1)
+    term.setCursorPos(1,1)
     centerWrite("Setup Menu")
     term.setCursorPos(1,2)
     centerWrite(string.rep("-",w))
